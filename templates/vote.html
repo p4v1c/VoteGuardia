@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">Homepage</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/vote">Vote</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/register">Register</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container text-center mt-5">
+        <h1 class="display-4">Vote Page</h1>
+        <p class="lead">Submit your vote here.</p>
+
+        <!-- Voting Form -->
+        <form class="mt-4" action="/submit-vote" method="POST">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="vote" id="croissant" value="croissant" required>
+                <label class="form-check-label" for="croissant">
+                    Croissant
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="vote" id="chocolatine" value="chocolatine" required>
+                <label class="form-check-label" for="chocolatine">
+                    Chocolatine
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Submit Vote</button>
+        </form>
+
+        <a href="/" class="btn btn-link mt-4">Back to Home</a>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
