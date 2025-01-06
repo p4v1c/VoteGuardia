@@ -1,24 +1,42 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, flash
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_sqlalchemy import SQLAlchemy
+import helpers_func as helpers_func
+
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 
-# Configure the SQLite database
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# Define the User model
+#Init le rsa
+helpers_func.rsa_init()
+
+
+# Table electeurs
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
+    vote_count = db.Column(db.Integer, nullable=False, default=0)
 
-# Create the database
+# Table votes
+class Vote(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    encrypted_vote = db.Column(db.Text, nullable=False)
+    encrypted_aes_key = db.Column(db.Text, nullable=False)
+    hmac_value = db.Column(db.Text, nullable=False)
+
+# Create all tables 
 with app.app_context():
+    # On demare avec une app vide
+    db.create_all()
+    db.drop_all()
     db.create_all()
 
 @app.route("/register", methods=["GET", "POST"])
@@ -48,24 +66,102 @@ def login():
             return "Invalid username or password!"
 
         session['username'] = username
+        session['user_id'] = user.id
+
         return redirect(url_for("vote"))
 
     return render_template('login.html')
 
-@app.route("/vote")
+
+@app.route("/vote", methods=["GET", "POST"])
 def vote():
     if 'username' not in session:
         return redirect(url_for("login"))
+
+    if request.method == "POST":
+        
+        choice = request.form.get("vote")  # 'croissant' | 'chocolatine'
+        user_id = session['user_id']
+        user = User.query.filter_by(id=user_id).first()
+        if user.vote_count >= 1:
+            return render_template('vote.html', username=session['username'], messages=flash('You already voted', 'danger'))
+
+        # Gen key AES pour le vote
+        aes_key = helpers_func.generate_aes_key()
+
+        # Chiffre le vote
+        encrypted_vote = helpers_func.encrypt_with_aes(aes_key, choice)
+
+        # "protege" la clée du client
+        encrypted_aes_key = helpers_func.encrypt_aes_key_with_rsa(aes_key, helpers_func.server_public_key)
+
+        # Genere hmac pour anti tamper
+        vote_hmac = helpers_func.generate_hmac(aes_key, encrypted_vote)
+
+        # On stocke le tout
+        
+        user.vote_count += 1
+        new_vote = Vote(
+            user_id=user_id,
+            encrypted_vote=encrypted_vote.hex(), 
+            encrypted_aes_key=encrypted_aes_key.hex(),
+            hmac_value=vote_hmac.hex()
+        )
+        db.session.add(new_vote)
+        db.session.commit()
+
+        return render_template('vote.html', username=session['username'], messages=flash('Vote submited', 'success'))
+
     return render_template('vote.html', username=session['username'])
+
 
 @app.route("/logout")
 def logout():
     session.pop('username', None)
     return redirect(url_for("home"))
 
+@app.route("/results")
+def results():
+    """
+    This endpoint is more meant to show how the server decrypt and "count" the votes
+    However using such method irl is risky and doesnt follow guidelines of what
+    could be qualified as a "democratic" vote, because voter secrecy isnt guaranteed at all
+    and there is no security measure if there is a compromission somewhere in the chain of trust
+    """
+    votes_data = []
+    all_votes = Vote.query.all()
+
+    for v in all_votes:
+        
+        encrypted_vote_bytes = bytes.fromhex(v.encrypted_vote)
+        encrypted_aes_key_bytes = bytes.fromhex(v.encrypted_aes_key)
+        hmac_bytes = bytes.fromhex(v.hmac_value)
+        
+        aes_key = helpers_func.decrypt_aes_key_with_rsa(encrypted_aes_key_bytes, helpers_func.server_private_key)
+
+        try:
+            helpers_func.verify_hmac(aes_key, encrypted_vote_bytes, hmac_bytes)
+            integrity_status = "OK"
+        except Exception as e:
+            integrity_status = f"FAILED: {e}"
+
+        # Decrypt the vote
+        decrypted_vote = helpers_func.decrypt_with_aes(aes_key, encrypted_vote_bytes)
+
+        votes_data.append({
+            'user_id': v.user_id,
+            'decrypted_vote': decrypted_vote,
+            'integrity': integrity_status
+        })
+
+    return render_template('results.html', votes=votes_data)
+
+
+
 @app.route('/')
 def home():
     return render_template('index.html')
+
 
 if __name__ == "__main__":
     app.run(debug=True)

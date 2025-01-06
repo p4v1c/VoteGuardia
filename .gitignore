@@ -1,0 +1,4 @@
+instance/users.db
+__pycache__/helpers_func.cpython-311.pyc
+server_public_key.pem
+server_private_key.pem
