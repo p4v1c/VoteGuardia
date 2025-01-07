@@ -80,7 +80,7 @@ def vote():
 
     if request.method == "POST":
         
-        choice = request.form.get("vote")  # 'croissant' | 'chocolatine'
+        choice = request.form.get("vote").split(":")[1]  # 'croissant' | 'chocolatine'
         user_id = session['user_id']
         user = User.query.filter_by(id=user_id).first()
         if user.vote_count >= 1:
@@ -110,7 +110,7 @@ def vote():
         db.session.add(new_vote)
         db.session.commit()
 
-        return render_template('vote.html', username=session['username'], messages=flash('Vote submited', 'success'))
+        return render_template('vote.html', username=session['username'], messages=flash(f'Vote submited for {choice}', 'success'))
 
     return render_template('vote.html', username=session['username'])
 

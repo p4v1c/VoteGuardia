@@ -2,3 +2,7 @@ instance/users.db
 __pycache__/helpers_func.cpython-311.pyc
 server_public_key.pem
 server_private_key.pem
+__pycache__/auto_votingmitm.cpython-313.pyc
+__pycache__/helpers_func.cpython-313.pyc
+instance/users.db
+instance/users.db
