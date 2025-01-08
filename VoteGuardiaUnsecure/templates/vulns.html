@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Explication des Vulnérabilités</title>
+
+        <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    </head>
+<body>
+    {% include "navbar.html" %}
+    <div class="container mt-5">
+        <h2>Détail des Vulnérabilités</h2>
+        <p>Cette page décrit les vulnérabilités intentionnelles présentes dans l'exemple donné, afin d'illustrer les problèmes de sécurité courants.</p>
+
+        <ul class="list-group">
+            <li class="list-group-item">
+                <strong>Mots de passe stockés avec des algorithmes faibles :</strong> Les mots de passe sont stockés en utilisant une fonction de hachage MD5 non salée. MD5 est considéré comme cassé et vulnérable aux attaques par force brute et par dictionnaire. De plus, l'absence de "sel" facilite les attaques sur plusieurs utilisateurs ayant le même mot de passe. La page de démonstration des mots de passes donne un exemple de bruteforce côté client pour démontrer la faiblesse de cette méthode de stockage.
+            </li>
+            <li class="list-group-item">
+                <strong>Génération RSA défaillante :</strong> La clé privée RSA est générée en utilisant P et Q des nombres premiers connus, en utilisant des sites commes <a href="https://factordb.com">factordb</a>, il est possible de factoriser la clée publique, et ainsi de retrouver la clée privée 
+            </li>
+            <li class="list-group-item">
+                <strong>Choix de clée faible :</strong> Le choix de la clée AES est relativement faible et cette clée est unique pour l'ensemble de l'application, en utilisant les HMAC exposés, il est possible de retrouver cette clée par force brute
+            </li>
+            <li class="list-group-item">
+                <strong>Algorithmes faible :</strong> Le mode de chiffrement pour les votes en base utilise AES-ECB avec une clée statique, si les HMAC ne sont pas assez robustes et que une tierce partie est capable d'altérer la BDD, il serait alors possible d'altérer les blocks sans connaitre la clée AES. Il est également posible de faire une analyse statistique sur chaque vote étant donné qu'avec ce mode, le même texte en clair chiffré avec la même clée donnera le même résultat
+            </li>
+            <li class="list-group-item">
+                <strong>Utilisation de HTTP sans chiffrement :</strong> La connexion au serveur se fait via HTTP en clair, ce qui expose les données aux attaques de type "man-in-the-middle" (MITM). Les attaquants peuvent intercepter ou modifier les communications entre le client et le serveur, compromettant la confidentialité et l'intégrité.
+            </li>
+        </ul>
+
+        <p class="mt-4">Ces vulnérabilités illustrent l'importance d'appliquer les meilleures pratiques de sécurité, comme l'utilisation de fonctions de hachage modernes (par exemple, bcrypt, scrypt ou Argon2), une génération de clés RSA robuste, le choix de secrets robustes et l'utilisation d'une connexion HTTPS sécurisée.</p>
+
+    </div>
+</body>
+</html>

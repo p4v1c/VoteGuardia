@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Home</title>
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body>
+    {% include "navbar.html" %}
+    <div class="container mt-5">
+        <h1>Welcome to My Voting System</h1>
+        <p>Please register or login to cast your vote.</p>
+    </div>
+</body>
+</html>

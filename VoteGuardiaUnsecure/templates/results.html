@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Results</title>
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+</head>
+<body>
+    {% include "navbar.html" %}
+    <div class="container mt-5">
+        <h2>Decrypted Votes (Demo)</h2>
+        <p>This page demonstrates how the server decrypts and verifies each vote.</p>
+
+        <table class="table table-bordered mt-3">
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Decrypted Vote</th>
+                    <th>Integrity Check</th>
+                    <th>encrypted vote</th>
+                    <th>Hmac</th>
+                    
+                </tr>
+            </thead>
+            <tbody>
+            {% for v in votes %}
+                <tr>
+                    <td>{{ v.user_id }}</td>
+                    <td>{{ v.decrypted_vote }}</td>
+                    <td>{{ v.integrity }}</td>
+                    <td>{{ v.encrypted_vote }}</td>
+                    <td>{{ v.hmac }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <p class="text-break">Our public modulus for encrypting AES keys for vote is <code>{{n}}</code> </p>
+
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <h2 class="text-center">HMAC Checker</h2>
+                <div class="input-group mb-3">
+                    <form action="/bruteHmac" method="POST" id="hmacForm">
+                        <label for="hmac" class="form-label">Enter HMAC</label>
+                        <input type="text" id="hmac" name="hmac" class="form-control" placeholder="Enter hash to search" required>
+                        
+                        <label for="plaintext" class="form-label">Enter Plaintext</label>
+                        <input type="text" id="plaintext" name="plaintext" class="form-control" placeholder="Enter corresponding plaintext" required>
+                        
+                        <button class="btn btn-primary" type="submit" id="checkHash">Check</button>
+                    </form>
+                </div>
+                
+                <div id="result" class="alert d-none"></div>
+                <p id="hashrate" class="text-muted text-center"></p>
+            </div>
+        </div>
+        
+        <script>
+            document.getElementById('hmacForm').addEventListener('submit', function(event) {
+                event.preventDefault();  // Prevent default form submission
+        
+                const hmac = document.getElementById('hmac').value;
+                const plaintext = document.getElementById('plaintext').value;
+        
+                // Send AJAX request
+                fetch('/bruteHmac', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({
+                        'hmac': hmac,
+                        'plaintext': plaintext
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const resultElement = document.getElementById('result');
+                    if (data.Status === "success") {
+                        resultElement.classList.remove('d-none');
+                        resultElement.classList.add('alert-success');
+                        resultElement.textContent = `Success! The key is: ${data.key}`;
+                    } else {
+                        resultElement.classList.remove('d-none');
+                        resultElement.classList.add('alert-danger');
+                        resultElement.textContent = "Failed to find a matching key.";
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("There was an error processing your request.");
+                });
+            });
+        </script>
+        
+
+    </div>
+    </div>
+    </div>
+</body>
+</html>

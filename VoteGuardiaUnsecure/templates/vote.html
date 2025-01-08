@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vote</title>
+    <!-- Bootstrap CSS -->
+    <link href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+</head>
+
+<body>
+    {% include "navbar.html" %}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+         
+                    {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+                    {% endfor %}
+
+                {% endif %}
+                {% endwith %}
+                <div class="card shadow">
+                    <div class="card-header text-center">
+                        <h1 class="h4">Votez pour votre préféré</h1>
+                    </div>
+                    <div class="card-body">
+                        <form action="/vote" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label">Quel terme utilisez-vous ?</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="pain_au_chocolat" name="vote"
+                                        value="Vote :pain_au_chocolat" required>
+                                    <label class="form-check-label" for="pain_au_chocolat">
+                                        Pain au chocolat
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" id="chocolatine" name="vote"
+                                        value="Vote :chocolatine" required>
+                                    <label class="form-check-label" for="chocolatine">
+                                        Chocolatine
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Envoyer votre vote</button>
+                        </form>
+                    </div>
+                </div>
+                <div class="text-center mt-3">
+                    <a href="/" class="btn btn-link">Retour à l'accueil</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS (Optional) -->
+    <script src="{{ url_for('static', filename='bootstrap.bundle.min.js') }}"></script>
+</body>
+
+</html>
