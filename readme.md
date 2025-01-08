@@ -9,12 +9,6 @@ A good starting point and resource for base threat modelling in nation-wide elec
 # USAGE
 
 ```
-pip install -requirements.txt
+pip install -r requirements.txt
 python3 app.py
 ```
-
-```
-mitmproxy -s ./auto_intercept.py --mode regular@8082  --set console_eventlog_verbosity=warn
-```
-# TODO
-- Implement unsecure protocol and show practical attacks against them
